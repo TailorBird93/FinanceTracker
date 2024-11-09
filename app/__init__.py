@@ -9,8 +9,8 @@ template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'te
 static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static'))
 
 app = Flask(__name__,
-            template_folder=template_dir,
-            static_folder=static_dir)
+            template_folder='../templates',
+            static_folder='../static/styles/css')
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)

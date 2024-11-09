@@ -65,3 +65,41 @@ The application uses SQLite for development purposes.
     ```bash 
     db.create_all()
     exit()
+
+## Transaction Management
+
+The application supports full CRUD operations for transactions:
+
+- **Create**: Add new transactions.
+- **Read**: View a list of your transactions.
+- **Update**: Edit existing transactions.
+- **Delete**: Delete transactions.
+
+### Features
+
+- Transactions are displayed in a table with date, category, amount, and description.
+- Users can only edit or delete their own transactions.
+- Confirmation prompts are provided before deleting a transaction.
+
+### How to Use
+
+1. **Adding a Transaction**:
+
+   - Navigate to "Add Transaction" in the navigation menu.
+   - Fill out the form and submit.
+
+2. **Editing a Transaction**:
+
+   - On the home page, click "Edit" next to the transaction you wish to modify.
+   - Update the details and submit.
+
+3. **Deleting a Transaction**:
+
+   - On the home page, click "Delete" next to the transaction you wish to remove.
+   - Confirm the deletion when prompted.
+
+## Security Features
+
+- **User Authentication**: Only logged-in users can manage transactions.
+- **Authorization Checks**: Users cannot edit or delete transactions that do not belong to them.
+- **CSRF Protection**: All forms include CSRF tokens to protect against cross-site request forgery attacks.
