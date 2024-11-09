@@ -4,6 +4,7 @@ from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm
 from app.models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
+from sqlalchemy import extract, func
 from datetime import datetime
 
 @app.route('/')
@@ -145,3 +146,33 @@ def set_budget():
 def view_budgets():
     budgets = Budget.query.filter_by(user_id=current_user.id).all()
     return render_template('budgets.html', title='Your Budgets', budgets=budgets)
+
+
+@app.route('/reports')
+@login_required
+def reports():
+    
+    current_month = datetime.utcnow().month
+    current_year = datetime.utcnow().year
+
+    
+    budgets = Budget.query.filter_by(user_id=current_user.id, month=f"{current_year}-{current_month:02}").all()
+
+    report_data = []
+    for budget in budgets:
+        
+        total_spent = db.session.query(func.sum(Transaction.amount)).filter(
+            Transaction.user_id == current_user.id,
+            Transaction.category_id == budget.category_id,
+            extract('year', Transaction.date) == current_year,
+            extract('month', Transaction.date) == current_month
+        ).scalar() or 0
+
+        report_data.append({
+            'category': budget.category.name,
+            'budgeted': budget.amount,
+            'spent': total_spent,
+            'remaining': budget.amount - total_spent
+        })
+
+    return render_template('reports.html', title='Reports', report_data=report_data, month=current_month, year=current_year)
