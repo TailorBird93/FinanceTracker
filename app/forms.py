@@ -38,7 +38,13 @@ class RegistrationForm(FlaskForm):
 
 class TransactionForm(FlaskForm):
     amount = FloatField('Amount', validators=[DataRequired()])
-    category = StringField('Category', validators=[DataRequired()])
+    category = SelectField('Category', coerce=int, validators=[DataRequired()])
     date = DateField('Date', validators=[DataRequired()], format='%Y-%m-%d')
     description = TextAreaField('Description', validators=[Length(max=200)])
-    submit = SubmitField('Add Transaction')
+    submit = SubmitField('Submit')
+
+class CategoryForm(FlaskForm):
+    name = StringField('Category Name', validators=[DataRequired(), Length(max=64)])
+    submit = SubmitField('Add Category')
+
+

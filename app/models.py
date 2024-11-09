@@ -7,11 +7,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    transactions = db.relationship('Transaction', backref='category', lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    transactions = db.relationship('Transaction', back_populates='category', lazy='dynamic')
 
     def __repr__(self):
         return f'<Category {self.name}>'
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,10 +34,12 @@ class User(UserMixin, db.Model):
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    date = db.Column(db.DateTime, index=True)
+    date = db.Column(db.DateTime, index=True, nullable=False)
     description = db.Column(db.String(200))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    category = db.relationship('Category', back_populates='transactions', lazy=True)
 
     def __repr__(self):
         return f'<Transaction {self.amount} - {self.category.name}>'
+

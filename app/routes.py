@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, TransactionForm
-from app.models import User, Transaction
+from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm
+from app.models import User, Transaction, Category
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
 from datetime import datetime
@@ -17,10 +17,16 @@ def index():
 @login_required
 def add_transaction():
     form = TransactionForm()
+    # Load categories for the current user
+    categories = Category.query.filter_by(user_id=current_user.id).all()
+    if not categories:
+        flash('Please add a category before adding transactions.')
+        return redirect(url_for('add_category'))
+    form.category.choices = [(c.id, c.name) for c in categories]
     if form.validate_on_submit():
         transaction = Transaction(
             amount=form.amount.data,
-            category=form.category.data,
+            category_id=form.category.data,
             date=form.date.data,
             description=form.description.data,
             user_id=current_user.id
@@ -30,6 +36,7 @@ def add_transaction():
         flash('Your transaction has been added.')
         return redirect(url_for('index'))
     return render_template('add_transaction.html', title='Add Transaction', form=form)
+
 
 @app.route('/edit_transaction/<int:transaction_id>', methods=['GET', 'POST'])
 @login_required
@@ -107,3 +114,15 @@ def register():
 def categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('categories.html', title='Categories', categories=categories)
+
+@app.route('/add_category', methods=['GET', 'POST'])
+@login_required
+def add_category():
+    form = CategoryForm()
+    if form.validate_on_submit():
+        category = Category(name=form.name.data, user_id=current_user.id)
+        db.session.add(category)
+        db.session.commit()
+        flash('Category added successfully.')
+        return redirect(url_for('categories'))
+    return render_template('add_category.html', title='Add Category', form=form)
