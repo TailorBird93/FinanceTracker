@@ -35,3 +35,33 @@ The Personal Finance Tracker is a web application designed to help users manage 
 ### Technologies Used
 Python 3
 Flask
+
+## Database Setup
+
+The application uses SQLite for development purposes.
+
+### Creating the Database
+
+1. **Set the FLASK_APP Environment Variable**:
+
+   - On macOS/Linux:
+
+     ```bash
+     export FLASK_APP=manage.py
+     ```
+
+   - On Windows:
+
+     ```bash
+     set FLASK_APP=manage.py
+     ```
+
+2. **Create the Database Tables**:
+
+   ```bash
+   flask shell
+3. **In the shell, run:**
+
+    ```bash 
+    db.create_all()
+    exit()
