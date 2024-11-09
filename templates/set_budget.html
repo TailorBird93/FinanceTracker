@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Set Budget{% endblock %}
+{% block content %}
+<h1>Set a New Budget</h1>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.amount.label }}<br>
+        {{ form.amount() }}
+    </p>
+    <p>
+        {{ form.month.label }}<br>
+        {{ form.month() }}
+    </p>
+    <p>
+        {{ form.category.label }}<br>
+        {{ form.category() }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
