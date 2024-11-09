@@ -14,6 +14,8 @@ app = Flask(__name__,
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db, render_as_batch=True)
+
 login = LoginManager(app)
 login.login_view = 'login'
 
@@ -21,6 +23,5 @@ from app.models import User
 @login.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-migrate = Migrate(app, db)
 
 from app import routes, models

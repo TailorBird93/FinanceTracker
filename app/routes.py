@@ -101,3 +101,9 @@ def register():
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/categories')
+@login_required
+def categories():
+    categories = Category.query.filter_by(user_id=current_user.id).all()
+    return render_template('categories.html', title='Categories', categories=categories)
