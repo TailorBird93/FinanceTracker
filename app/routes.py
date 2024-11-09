@@ -3,12 +3,19 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, TransactionForm
 from app.models import User, Transaction
 from flask_login import current_user, login_user, logout_user, login_required
-from werkzeug.urls import url_parse
+from urllib.parse import urlparse
+from datetime import datetime
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
+@app.route('/')
+@app.route('/index')
 @login_required
 def index():
+    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
+    return render_template('index.html', title='Home', transactions=transactions)
+
+@app.route('/add_transaction', methods=['GET', 'POST'])
+@login_required
+def add_transaction():
     form = TransactionForm()
     if form.validate_on_submit():
         transaction = Transaction(
@@ -22,8 +29,42 @@ def index():
         db.session.commit()
         flash('Your transaction has been added.')
         return redirect(url_for('index'))
-    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
-    return render_template('index.html', title='Home', form=form, transactions=transactions)
+    return render_template('add_transaction.html', title='Add Transaction', form=form)
+
+@app.route('/edit_transaction/<int:transaction_id>', methods=['GET', 'POST'])
+@login_required
+def edit_transaction(transaction_id):
+    transaction = Transaction.query.get_or_404(transaction_id)
+    if transaction.user_id != current_user.id:
+        flash('You do not have permission to edit this transaction.')
+        return redirect(url_for('index'))
+    form = TransactionForm()
+    if form.validate_on_submit():
+        transaction.amount = form.amount.data
+        transaction.category = form.category.data
+        transaction.date = form.date.data
+        transaction.description = form.description.data
+        db.session.commit()
+        flash('Your transaction has been updated.')
+        return redirect(url_for('index'))
+    elif request.method == 'GET':
+        form.amount.data = transaction.amount
+        form.category.data = transaction.category
+        form.date.data = transaction.date
+        form.description.data = transaction.description
+    return render_template('edit_transaction.html', title='Edit Transaction', form=form)
+
+@app.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
+@login_required
+def delete_transaction(transaction_id):
+    transaction = Transaction.query.get_or_404(transaction_id)
+    if transaction.user_id != current_user.id:
+        flash('You do not have permission to delete this transaction.')
+        return redirect(url_for('index'))
+    db.session.delete(transaction)
+    db.session.commit()
+    flash('Your transaction has been deleted.')
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -37,7 +78,7 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
+        if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
