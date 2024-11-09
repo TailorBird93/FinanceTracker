@@ -17,7 +17,6 @@ def index():
 @login_required
 def add_transaction():
     form = TransactionForm()
-    # Load categories for the current user
     categories = Category.query.filter_by(user_id=current_user.id).all()
     if not categories:
         flash('Please add a category before adding transactions.')
@@ -45,21 +44,17 @@ def edit_transaction(transaction_id):
     if transaction.user_id != current_user.id:
         flash('You do not have permission to edit this transaction.')
         return redirect(url_for('index'))
-    form = TransactionForm()
+    form = TransactionForm(obj=transaction)
+    form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
     if form.validate_on_submit():
         transaction.amount = form.amount.data
-        transaction.category = form.category.data
+        transaction.category_id = form.category.data
         transaction.date = form.date.data
         transaction.description = form.description.data
         db.session.commit()
-        flash('Your transaction has been updated.')
+        flash('Transaction updated successfully.')
         return redirect(url_for('index'))
-    elif request.method == 'GET':
-        form.amount.data = transaction.amount
-        form.category.data = transaction.category
-        form.date.data = transaction.date
-        form.description.data = transaction.description
-    return render_template('edit_transaction.html', title='Edit Transaction', form=form)
+    return render_template('edit_transaction.html', title='Edit Transaction', form=form, transaction=transaction)
 
 @app.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
 @login_required
@@ -70,7 +65,7 @@ def delete_transaction(transaction_id):
         return redirect(url_for('index'))
     db.session.delete(transaction)
     db.session.commit()
-    flash('Your transaction has been deleted.')
+    flash('Transaction deleted successfully.')
     return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
