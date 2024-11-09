@@ -5,5 +5,15 @@
 {% block content %}
 <h1>Welcome to Your Personal Finance Tracker</h1>
 <p>Track your income, expenses, and budgets all in one place.</p>
+
+<h2>Your Transactions</h2>
+<ul>
+    {% for transaction in transactions %}
+        <li>{{ transaction.date.strftime('%Y-%m-%d') }} - {{ transaction.category }}: ${{ transaction.amount }} - {{ transaction.description }}</li>
+    {% else %}
+        <li>No transactions available.</li>
+    {% endfor %}
+</ul>
 {% endblock %}
+
 
