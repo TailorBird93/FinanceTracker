@@ -42,4 +42,18 @@ class Transaction(db.Model):
 
     def __repr__(self):
         return f'<Transaction {self.amount} - {self.category.name}>'
+    
+class Budget(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Float, nullable=False)
+    month = db.Column(db.String(7), nullable=False)  
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    category = db.relationship('Category', backref='budgets')
+    user = db.relationship('User', backref='budgets')
+
+    def __repr__(self):
+        return f'<Budget {self.amount} for {self.category.name} in {self.month}>'
+
 
