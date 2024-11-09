@@ -1,8 +1,8 @@
-"""Initial migration
+"""Initial migration with Budget unique constraint
 
-Revision ID: bd5a7202656d
+Revision ID: 945f3f375815
 Revises: 
-Create Date: 2024-11-09 21:18:55.103470
+Create Date: 2024-11-09 23:43:54.817625
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bd5a7202656d'
+revision = '945f3f375815'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,16 +32,27 @@ def upgrade():
     op.create_table('category',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('budget',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.Column('month', sa.String(length=7), nullable=False),
+    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'category_id', 'month', name='uix_user_category_month')
     )
     op.create_table('transaction',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
-    sa.Column('date', sa.DateTime(), nullable=True),
+    sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('description', sa.String(length=200), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
@@ -59,6 +70,7 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_transaction_date'))
 
     op.drop_table('transaction')
+    op.drop_table('budget')
     op.drop_table('category')
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_user_username'))

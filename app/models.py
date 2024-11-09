@@ -1,8 +1,8 @@
-# app/models.py
 
 from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import UniqueConstraint
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,12 +46,16 @@ class Transaction(db.Model):
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    month = db.Column(db.String(7), nullable=False)  
+    month = db.Column(db.String(7), nullable=False)  # Format: YYYY-MM
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     category = db.relationship('Category', backref='budgets')
     user = db.relationship('User', backref='budgets')
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'category_id', 'month', name='uix_user_category_month'),
+    )
 
     def __repr__(self):
         return f'<Budget {self.amount} for {self.category.name} in {self.month}>'

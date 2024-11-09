@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% block title %}Set Budget{% endblock %}
 {% block content %}
@@ -10,7 +11,7 @@
     </p>
     <p>
         {{ form.month.label }}<br>
-        {{ form.month() }}
+        {{ form.month(type="month") }}
     </p>
     <p>
         {{ form.category.label }}<br>

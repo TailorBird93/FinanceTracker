@@ -9,7 +9,7 @@ from wtforms import (
     DateField,
     SelectField
 )
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length, Regexp
 from app.models import User
 
 class LoginForm(FlaskForm):
@@ -50,7 +50,13 @@ class CategoryForm(FlaskForm):
 
 class BudgetForm(FlaskForm):
     amount = FloatField('Budget Amount', validators=[DataRequired()])
-    month = StringField('Month (YYYY-MM)', validators=[DataRequired(), Length(min=7, max=7)])
+    month = StringField(
+        'Month',
+        validators=[
+            DataRequired(),
+            Regexp(r'^\d{4}-(0[1-9]|1[0-2])$', message="Please enter a valid month in YYYY-MM format.")
+        ]
+    )
     category = SelectField('Category', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Set Budget')
 
