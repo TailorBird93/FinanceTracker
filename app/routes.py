@@ -5,8 +5,8 @@ from app.models import User, Transaction
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     form = TransactionForm()
