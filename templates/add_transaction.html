@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Add Transaction{% endblock %}
+{% block content %}
+<h1>Add a New Transaction</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.amount.label }}<br>
+        {{ form.amount() }}
+    </p>
+    <p>
+        {{ form.category.label }}<br>
+        {{ form.category() }}
+    </p>
+    <p>
+        {{ form.date.label }}<br>
+        {{ form.date() }}
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(rows=3) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
