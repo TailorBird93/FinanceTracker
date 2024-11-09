@@ -48,3 +48,11 @@ class CategoryForm(FlaskForm):
     submit = SubmitField('Add Category')
 
 
+class BudgetForm(FlaskForm):
+    amount = FloatField('Budget Amount', validators=[DataRequired()])
+    month = StringField('Month (YYYY-MM)', validators=[DataRequired(), Length(min=7, max=7)])
+    category = SelectField('Category', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Set Budget')
+
+
+
