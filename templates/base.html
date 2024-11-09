@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>{% block title %}Personal Finance Tracker{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    
 </head>
 <body>
     <header>
@@ -12,6 +11,7 @@
             <ul>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('categories') }}">Categories</a></li>
                     <li><a href="{{ url_for('add_transaction') }}">Add Transaction</a></li>
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}

@@ -10,7 +10,7 @@ static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'stat
 
 app = Flask(__name__,
             template_folder='../templates',
-            static_folder='../static/styles/css')
+            static_folder='../static')
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)
