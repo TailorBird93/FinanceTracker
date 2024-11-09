@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1>Spending Report for {{ month }}/{{ year }}</h1>
+
+{% if report_data %}
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Budgeted Amount</th>
+                <th>Spent Amount</th>
+                <th>Remaining</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in report_data %}
+                <tr>
+                    <td>{{ data.category }}</td>
+                    <td>${{ "%.2f"|format(data.budgeted) }}</td>
+                    <td>${{ "%.2f"|format(data.spent) }}</td>
+                    <td>${{ "%.2f"|format(data.remaining) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No budgets set for this month.</p>
+{% endif %}
+{% endblock %}
