@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm
-from app.models import User, Transaction, Category
+from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm, BudgetForm
+from app.models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
 from datetime import datetime
@@ -121,3 +121,27 @@ def add_category():
         flash('Category added successfully.')
         return redirect(url_for('categories'))
     return render_template('add_category.html', title='Add Category', form=form)
+
+@app.route('/set_budget', methods=['GET', 'POST'])
+@login_required
+def set_budget():
+    form = BudgetForm()
+    form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
+    if form.validate_on_submit():
+        budget = Budget(
+            amount=form.amount.data,
+            month=form.month.data,
+            category_id=form.category.data,
+            user_id=current_user.id
+        )
+        db.session.add(budget)
+        db.session.commit()
+        flash('Budget set successfully.')
+        return redirect(url_for('view_budgets'))
+    return render_template('set_budget.html', title='Set Budget', form=form)
+
+@app.route('/budgets')
+@login_required
+def view_budgets():
+    budgets = Budget.query.filter_by(user_id=current_user.id).all()
+    return render_template('budgets.html', title='Your Budgets', budgets=budgets)
