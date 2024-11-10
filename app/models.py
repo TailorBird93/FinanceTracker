@@ -46,7 +46,7 @@ class Transaction(db.Model):
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    month = db.Column(db.String(7), nullable=False)  # Format: YYYY-MM
+    month = db.Column(db.String(7), nullable=False)  
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 

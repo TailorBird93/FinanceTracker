@@ -355,7 +355,7 @@ def change_password():
 def edit_category(category_id):
     category = Category.query.get_or_404(category_id)
     if category.user_id != current_user.id:
-        abort(403)  # Forbidden access
+        abort(403)  
 
     form = CategoryForm(obj=category)
     if form.validate_on_submit():
@@ -374,7 +374,7 @@ def edit_category(category_id):
 def delete_category(category_id):
     category = Category.query.get_or_404(category_id)
     if category.user_id != current_user.id:
-        abort(403)  # Forbidden access
+        abort(403)  
 
     db.session.delete(category)
     db.session.commit()
