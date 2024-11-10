@@ -1,16 +1,9 @@
 import os
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 
-app = Flask(__name__)
+load_dotenv() 
+
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "your-default-secret-key")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://", 1)
+    SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///local.db").replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-# fix the DATABASE_URL for SQLAlchemy
-DATABASE_URL = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://", 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
-# Initialize the database
-db = SQLAlchemy(app)

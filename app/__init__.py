@@ -1,27 +1,29 @@
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_migrate import Migrate
-import os
+from flask_login import LoginManager
 
-template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'templates'))
-static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static'))
 
-app = Flask(__name__,
-            template_folder='../templates',
-            static_folder='../static')
-app.config.from_object(Config)
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db, render_as_batch=True)
-
-login = LoginManager(app)
+db = SQLAlchemy()
+migrate = Migrate()
+login = LoginManager()
 login.login_view = 'login'
 
-from app.models import User
-@login.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def create_app():
+    app = Flask(__name__, template_folder='../templates', static_folder='../static')
+    app.config.from_object(Config)
 
-from app import routes, models
+    
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login.init_app(app)
+
+   
+    with app.app_context():
+        from app import routes, models
+        
+    return app
+
+
+app = create_app()
