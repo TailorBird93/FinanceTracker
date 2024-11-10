@@ -1,11 +1,61 @@
 
+
 {% extends 'base.html' %}
 {% block title %}Home - Personal Finance Tracker{% endblock %}
 {% block content %}
 <h1>Welcome, {{ current_user.username }}!</h1>
 <p>Track your income, expenses, and budgets all in one place.</p>
 
-<p><a href="{{ url_for('add_transaction') }}">Add a New Transaction</a></p>
+<h2>Add a New Transaction</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.amount.label }}<br>
+        {{ form.amount(size=32) }}
+    </p>
+    <p>
+        {{ form.category.label }}<br>
+        {{ form.category() }}
+    </p>
+    <p>
+        {{ form.date.label }}<br>
+        {{ form.date() }}
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(rows=4, cols=32) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+
+<h2>Search Transactions</h2>
+<form method="get" action="{{ url_for('index') }}">
+    <p>
+        <label for="description">Description:</label><br>
+        <input type="text" name="description" id="description" value="{{ search_description }}">
+    </p>
+    <p>
+        <label for="category">Category:</label><br>
+        <select name="category" id="category">
+            <option value="0">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == search_category %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        <label for="start_date">Start Date:</label><br>
+        <input type="date" name="start_date" id="start_date" value="{{ search_start_date }}">
+    </p>
+    <p>
+        <label for="end_date">End Date:</label><br>
+        <input type="date" name="end_date" id="end_date" value="{{ search_end_date }}">
+    </p>
+    <p>
+        <button type="submit">Search</button>
+        <a href="{{ url_for('index') }}">Clear</a>
+    </p>
+</form>
 
 <h2>Your Transactions</h2>
 {% if transactions %}
@@ -24,7 +74,7 @@
             <tr>
                 <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
                 <td>{{ transaction.category.name }}</td>
-                <td>${{ transaction.amount }}</td>
+                <td>${{ "%.2f"|format(transaction.amount) }}</td>
                 <td>{{ transaction.description }}</td>
                 <td>
                     <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}">Edit</a> |

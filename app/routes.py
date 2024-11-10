@@ -1,3 +1,5 @@
+# app/routes.py
+
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm, BudgetForm
@@ -9,11 +11,63 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
 @app.route('/')
-@app.route('/index')
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    transactions = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date.desc()).all()
-    return render_template('index.html', title='Home', transactions=transactions)
+    form = TransactionForm()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
+    form.category.choices = [(c.id, c.name) for c in categories]
+    
+    # Handle search parameters
+    search_description = request.args.get('description', '', type=str)
+    search_category = request.args.get('category', 0, type=int)
+    search_start_date = request.args.get('start_date', '', type=str)
+    search_end_date = request.args.get('end_date', '', type=str)
+    
+    # Base query
+    transactions_query = Transaction.query.filter_by(user_id=current_user.id)
+    
+    # Apply filters
+    if search_description:
+        transactions_query = transactions_query.filter(Transaction.description.ilike(f"%{search_description}%"))
+    if search_category:
+        transactions_query = transactions_query.filter_by(category_id=search_category)
+    if search_start_date:
+        transactions_query = transactions_query.filter(Transaction.date >= search_start_date)
+    if search_end_date:
+        transactions_query = transactions_query.filter(Transaction.date <= search_end_date)
+    
+    # Order by date descending
+    transactions = transactions_query.order_by(Transaction.date.desc()).all()
+    
+    # Handle transaction form submission
+    if form.validate_on_submit():
+        transaction = Transaction(
+            amount=form.amount.data,
+            category_id=form.category.data,
+            date=form.date.data,
+            description=form.description.data,
+            user_id=current_user.id
+        )
+        db.session.add(transaction)
+        db.session.commit()
+        flash('Your transaction has been added.')
+        return redirect(url_for('index'))
+    
+    # Fetch categories for the search filter
+    categories = Category.query.filter_by(user_id=current_user.id).all()
+    
+    return render_template(
+        'index.html', 
+        title='Home', 
+        transactions=transactions,
+        categories=categories,
+        search_description=search_description,
+        search_category=search_category,
+        search_start_date=search_start_date,
+        search_end_date=search_end_date,
+        form=form  # <-- Added this line to pass the form to the template
+    )
 
 @app.route('/add_transaction', methods=['GET', 'POST'])
 @login_required
