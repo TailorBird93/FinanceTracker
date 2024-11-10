@@ -199,3 +199,47 @@ def reports():
         })
 
     return render_template('reports.html', title='Reports', report_data=report_data, month=current_month, year=current_year)
+
+
+@app.route('/edit_budget/<int:budget_id>', methods=['GET', 'POST'])
+@login_required
+def edit_budget(budget_id):
+    budget = Budget.query.get_or_404(budget_id)
+    if budget.user_id != current_user.id:
+        flash('You do not have permission to edit this budget.')
+        return redirect(url_for('view_budgets'))
+    form = BudgetForm(obj=budget)
+    form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
+    if form.validate_on_submit():
+        existing_budget = Budget.query.filter_by(
+            user_id=current_user.id,
+            category_id=form.category.data,
+            month=form.month.data
+        ).first()
+        if existing_budget and existing_budget.id != budget.id:
+            flash('A budget for this category and month already exists.')
+            return redirect(url_for('edit_budget', budget_id=budget.id))
+        
+        budget.amount = form.amount.data
+        budget.month = form.month.data
+        budget.category_id = form.category.data
+        try:
+            db.session.commit()
+            flash('Budget updated successfully.')
+            return redirect(url_for('view_budgets'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('A budget for this category and month already exists.')
+    return render_template('edit_budget.html', title='Edit Budget', form=form, budget=budget)
+
+@app.route('/delete_budget/<int:budget_id>', methods=['POST'])
+@login_required
+def delete_budget(budget_id):
+    budget = Budget.query.get_or_404(budget_id)
+    if budget.user_id != current_user.id:
+        flash('You do not have permission to delete this budget.')
+        return redirect(url_for('view_budgets'))
+    db.session.delete(budget)
+    db.session.commit()
+    flash('Budget deleted successfully.')
+    return redirect(url_for('view_budgets'))
