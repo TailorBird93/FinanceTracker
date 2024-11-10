@@ -1,4 +1,4 @@
-
+<!-- templates/index.html -->
 
 {% extends 'base.html' %}
 {% block title %}Home - Personal Finance Tracker{% endblock %}
@@ -6,86 +6,93 @@
 <h1>Welcome, {{ current_user.username }}!</h1>
 <p>Track your income, expenses, and budgets all in one place.</p>
 
+<!-- Add Transaction Form -->
 <h2>Add a New Transaction</h2>
-<form method="post">
+<form method="post" class="row g-3">
     {{ form.hidden_tag() }}
-    <p>
-        {{ form.amount.label }}<br>
-        {{ form.amount(size=32) }}
-    </p>
-    <p>
-        {{ form.category.label }}<br>
-        {{ form.category() }}
-    </p>
-    <p>
-        {{ form.date.label }}<br>
-        {{ form.date() }}
-    </p>
-    <p>
-        {{ form.description.label }}<br>
-        {{ form.description(rows=4, cols=32) }}
-    </p>
-    <p>{{ form.submit() }}</p>
+    <div class="col-md-3">
+        {{ form.amount.label(class="form-label") }}
+        {{ form.amount(class="form-control") }}
+    </div>
+    <div class="col-md-3">
+        {{ form.category.label(class="form-label") }}
+        {{ form.category(class="form-select") }}
+    </div>
+    <div class="col-md-3">
+        {{ form.date.label(class="form-label") }}
+        {{ form.date(class="form-control") }}
+    </div>
+    <div class="col-md-3">
+        {{ form.submit(class="btn btn-primary mt-4") }}
+    </div>
+    <div class="col-12">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control", rows="3") }}
+    </div>
 </form>
 
-<h2>Search Transactions</h2>
-<form method="get" action="{{ url_for('index') }}">
-    <p>
-        <label for="description">Description:</label><br>
-        <input type="text" name="description" id="description" value="{{ search_description }}">
-    </p>
-    <p>
-        <label for="category">Category:</label><br>
-        <select name="category" id="category">
+<!-- Search and Filter Form -->
+<h2 class="mt-5">Search Transactions</h2>
+<form method="get" action="{{ url_for('index') }}" class="row g-3">
+    <div class="col-md-3">
+        <label for="description" class="form-label">Description:</label>
+        <input type="text" name="description" id="description" class="form-control" value="{{ search_description }}">
+    </div>
+    <div class="col-md-3">
+        <label for="category" class="form-label">Category:</label>
+        <select name="category" id="category" class="form-select">
             <option value="0">All Categories</option>
             {% for category in categories %}
                 <option value="{{ category.id }}" {% if category.id == search_category %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
-    </p>
-    <p>
-        <label for="start_date">Start Date:</label><br>
-        <input type="date" name="start_date" id="start_date" value="{{ search_start_date }}">
-    </p>
-    <p>
-        <label for="end_date">End Date:</label><br>
-        <input type="date" name="end_date" id="end_date" value="{{ search_end_date }}">
-    </p>
-    <p>
-        <button type="submit">Search</button>
-        <a href="{{ url_for('index') }}">Clear</a>
-    </p>
+    </div>
+    <div class="col-md-3">
+        <label for="start_date" class="form-label">Start Date:</label>
+        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ search_start_date }}">
+    </div>
+    <div class="col-md-3">
+        <label for="end_date" class="form-label">End Date:</label>
+        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ search_end_date }}">
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-success">Search</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Clear</a>
+    </div>
 </form>
 
-<h2>Your Transactions</h2>
+<!-- Display Transactions -->
+<h2 class="mt-5">Your Transactions</h2>
 {% if transactions %}
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
-                <td>{{ transaction.category.name }}</td>
-                <td>${{ "%.2f"|format(transaction.amount) }}</td>
-                <td>{{ transaction.description }}</td>
-                <td>
-                    <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}">Edit</a> |
-                    <form action="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" method="post" style="display:inline;">
-                        <button type="submit" onclick="return confirm('Are you sure you want to delete this transaction?');">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ transaction.category.name }}</td>
+                    <td>${{ "%.2f"|format(transaction.amount) }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        <form action="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this transaction?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% else %}
     <p>No transactions available.</p>
 {% endif %}
