@@ -1,12 +1,9 @@
-<!-- templates/index.html -->
-
 {% extends 'base.html' %}
 {% block title %}Home - Personal Finance Tracker{% endblock %}
 {% block content %}
 <h1>Welcome, {{ current_user.username }}!</h1>
 <p>Track your income, expenses, and budgets all in one place.</p>
 
-<!-- Add Transaction Form -->
 <h2>Add a New Transaction</h2>
 <form method="post" class="row g-3">
     {{ form.hidden_tag() }}
@@ -48,7 +45,7 @@
     </div>
     <div class="col-12">
         {{ form.description.label(class="form-label") }}
-        {{ form.description(class="form-control", rows="3") }}
+        {{ form.description(class="form-control", rows="3", placeholder="Enter description") }}
         {% if form.description.errors %}
             <div class="text-danger">
                 {% for error in form.description.errors %}
