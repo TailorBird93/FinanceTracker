@@ -311,3 +311,8 @@ def delete_budget(budget_id):
     db.session.commit()
     flash('Budget deleted successfully.')
     return redirect(url_for('view_budgets'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', title='Profile')
