@@ -1,0 +1,24 @@
+<!-- templates/edit_budget.html -->
+
+{% extends 'base.html' %}
+{% block title %}Edit Budget{% endblock %}
+{% block content %}
+<h1>Edit Budget</h1>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.amount.label }}<br>
+        {{ form.amount() }}
+    </p>
+    <p>
+        {{ form.month.label }}<br>
+        {{ form.month(type="month") }}
+    </p>
+    <p>
+        {{ form.category.label }}<br>
+        {{ form.category() }}
+    </p>
+    <p>{{ form.submit(label='Update Budget') }}</p>
+</form>
+<p><a href="{{ url_for('view_budgets') }}">Back to Budgets</a></p>
+{% endblock %}
