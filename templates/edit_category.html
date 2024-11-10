@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Edit Category - Finance Tracker{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Edit Category</h1>
+    <form method="post" class="row g-3">
+        {{ form.hidden_tag() }}
+        
+        <div class="col-md-6">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", placeholder="Enter category name") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <div class="col-12">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('categories') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

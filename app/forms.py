@@ -10,7 +10,7 @@ from wtforms import (
     SelectField
 )
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length, Regexp
-from app.models import User
+from app.models import User, Category
 from flask_login import current_user
 
 class LoginForm(FlaskForm):
@@ -45,8 +45,13 @@ class TransactionForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class CategoryForm(FlaskForm):
-    name = StringField('Category Name', validators=[DataRequired(), Length(max=64)])
-    submit = SubmitField('Add Category')
+    name = StringField('Category Name', validators=[DataRequired(), Length(min=1, max=50)])
+    submit = SubmitField('Submit')
+
+    def validate_name(self, name):
+        category = Category.query.filter_by(name=name.data, user_id=current_user.id).first()
+        if category:
+            raise ValidationError('This category already exists.')
 
 
 class BudgetForm(FlaskForm):

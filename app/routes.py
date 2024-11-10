@@ -349,3 +349,34 @@ def change_password():
         flash('Your password has been updated.', 'success')
         return redirect(url_for('profile'))
     return render_template('change_password.html', title='Change Password', form=form)
+
+@app.route('/edit_category/<int:category_id>', methods=['GET', 'POST'])
+@login_required
+def edit_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    if category.user_id != current_user.id:
+        abort(403)  # Forbidden access
+
+    form = CategoryForm(obj=category)
+    if form.validate_on_submit():
+        category.name = form.name.data
+        try:
+            db.session.commit()
+            flash('Category updated successfully.', 'success')
+            return redirect(url_for('categories'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Category name already exists.', 'danger')
+    return render_template('edit_category.html', form=form, title='Edit Category')
+
+@app.route('/delete_category/<int:category_id>', methods=['POST'])
+@login_required
+def delete_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    if category.user_id != current_user.id:
+        abort(403)  # Forbidden access
+
+    db.session.delete(category)
+    db.session.commit()
+    flash('Category deleted successfully.', 'success')
+    return redirect(url_for('categories'))
