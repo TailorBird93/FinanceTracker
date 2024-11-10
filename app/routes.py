@@ -1,4 +1,3 @@
-# app/routes.py
 
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
@@ -9,25 +8,27 @@ from urllib.parse import urlparse
 from sqlalchemy import extract, func
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from flask_paginate import Pagination, get_page_parameter
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     form = TransactionForm()
-    categories = Category.query.filter_by(user_id=current_user.id).all()
-    form.category.choices = [(c.id, c.name) for c in categories]
+    form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
     
-    # Handle search parameters
     search_description = request.args.get('description', '', type=str)
     search_category = request.args.get('category', 0, type=int)
     search_start_date = request.args.get('start_date', '', type=str)
     search_end_date = request.args.get('end_date', '', type=str)
     
-    # Base query
+    
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10  
+    
+    
     transactions_query = Transaction.query.filter_by(user_id=current_user.id)
     
-    # Apply filters
     if search_description:
         transactions_query = transactions_query.filter(Transaction.description.ilike(f"%{search_description}%"))
     if search_category:
@@ -37,10 +38,14 @@ def index():
     if search_end_date:
         transactions_query = transactions_query.filter(Transaction.date <= search_end_date)
     
-    # Order by date descending
-    transactions = transactions_query.order_by(Transaction.date.desc()).all()
+    transactions_query = transactions_query.order_by(Transaction.date.desc())
     
-    # Handle transaction form submission
+    total = transactions_query.count()
+    
+    transactions = transactions_query.paginate(page=page, per_page=per_page, error_out=False).items
+    
+    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap5')
+    
     if form.validate_on_submit():
         transaction = Transaction(
             amount=form.amount.data,
@@ -54,7 +59,6 @@ def index():
         flash('Your transaction has been added.')
         return redirect(url_for('index'))
     
-    # Fetch categories for the search filter
     categories = Category.query.filter_by(user_id=current_user.id).all()
     
     return render_template(
@@ -66,7 +70,7 @@ def index():
         search_category=search_category,
         search_start_date=search_start_date,
         search_end_date=search_end_date,
-        form=form  # <-- Added this line to pass the form to the template
+        pagination=pagination
     )
 
 @app.route('/add_transaction', methods=['GET', 'POST'])
@@ -221,9 +225,18 @@ def set_budget():
 @app.route('/budgets')
 @login_required
 def view_budgets():
-    budgets = Budget.query.filter_by(user_id=current_user.id).all()
-    return render_template('budgets.html', title='Your Budgets', budgets=budgets)
+    from flask_paginate import Pagination, get_page_parameter
 
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10 
+    
+    budgets_query = Budget.query.filter_by(user_id=current_user.id).order_by(Budget.month.desc())
+    total = budgets_query.count()
+    budgets = budgets_query.paginate(page=page, per_page=per_page, error_out=False).items
+    
+    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap5')
+    
+    return render_template('budgets.html', title='Your Budgets', budgets=budgets, pagination=pagination)
 
 @app.route('/reports')
 @login_required
