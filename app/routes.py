@@ -1,7 +1,14 @@
 
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, TransactionForm, CategoryForm, BudgetForm
+from app.forms import (
+    LoginForm,
+    RegistrationForm,
+    TransactionForm,
+    CategoryForm,
+    BudgetForm,
+    ChangePasswordForm
+    )
 from app.models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
@@ -316,3 +323,17 @@ def delete_budget(budget_id):
 @login_required
 def profile():
     return render_template('profile.html', title='Profile')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if not current_user.check_password(form.current_password.data):
+            flash('Current password is incorrect.', 'danger')
+            return redirect(url_for('change_password'))
+        current_user.set_password(form.new_password.data)
+        db.session.commit()
+        flash('Your password has been updated.', 'success')
+        return redirect(url_for('profile'))
+    return render_template('change_password.html', title='Change Password', form=form)

@@ -11,6 +11,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length, Regexp
 from app.models import User
+from flask_login import current_user
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -60,5 +61,13 @@ class BudgetForm(FlaskForm):
     category = SelectField('Category', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Set Budget')
 
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField(
+        'Confirm New Password',
+        validators=[DataRequired(), EqualTo('new_password', message='Passwords must match.')]
+    )
+    submit = SubmitField('Change Password')
 
 
