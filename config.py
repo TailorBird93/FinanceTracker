@@ -1,9 +1,15 @@
 import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+app = Flask(__name__)
 
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key_here'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+# fix the DATABASE_URL for SQLAlchemy
+DATABASE_URL = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+
+=
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Recommended setting to avoid warnings
+
+# Initialize the database
+db = SQLAlchemy(app)
