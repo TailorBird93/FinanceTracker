@@ -1,7 +1,6 @@
-
-from flask import render_template, flash, redirect, url_for, request
-from app import app,db
-from app.forms import (
+from flask import Blueprint, abort, render_template, flash, redirect, url_for, request
+from . import db
+from .forms import (
     LoginForm,
     RegistrationForm,
     TransactionForm,
@@ -9,8 +8,8 @@ from app.forms import (
     BudgetForm,
     ChangePasswordForm,
     UpdateProfileForm
-    )
-from app.models import User, Transaction, Category, Budget
+)
+from .models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
 from sqlalchemy import extract, func
@@ -18,8 +17,11 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from flask_paginate import Pagination, get_page_parameter
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
+# Define a blueprint
+main = Blueprint('main', __name__)
+
+@main.route('/', methods=['GET', 'POST'])
+@main.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     form = TransactionForm()
@@ -82,7 +84,7 @@ def index():
         form=form
     )
 
-@app.route('/add_transaction', methods=['GET', 'POST'])
+@main.route('/add_transaction', methods=['GET', 'POST'])
 @login_required
 def add_transaction():
     form = TransactionForm()
@@ -106,7 +108,7 @@ def add_transaction():
     return render_template('add_transaction.html', title='Add Transaction', form=form)
 
 
-@app.route('/edit_transaction/<int:transaction_id>', methods=['GET', 'POST'])
+@main.route('/edit_transaction/<int:transaction_id>', methods=['GET', 'POST'])
 @login_required
 def edit_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
@@ -125,7 +127,7 @@ def edit_transaction(transaction_id):
         return redirect(url_for('index'))
     return render_template('edit_transaction.html', title='Edit Transaction', form=form, transaction=transaction)
 
-@app.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
+@main.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
 @login_required
 def delete_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
@@ -137,7 +139,7 @@ def delete_transaction(transaction_id):
     flash('Transaction deleted successfully.')
     return redirect(url_for('index'))
 
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -154,12 +156,12 @@ def login():
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
-@app.route('/logout')
+@main.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/register', methods=['GET', 'POST'])
+@main.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -173,13 +175,13 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
-@app.route('/categories')
+@main.route('/categories')
 @login_required
 def categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return render_template('categories.html', title='Categories', categories=categories)
 
-@app.route('/add_category', methods=['GET', 'POST'])
+@main.route('/add_category', methods=['GET', 'POST'])
 @login_required
 def add_category():
     form = CategoryForm()
@@ -191,7 +193,7 @@ def add_category():
         return redirect(url_for('categories'))
     return render_template('add_category.html', title='Add Category', form=form)
 
-@app.route('/set_budget', methods=['GET', 'POST'])
+@main.route('/set_budget', methods=['GET', 'POST'])
 @login_required
 def set_budget():
     form = BudgetForm()
@@ -231,7 +233,7 @@ def set_budget():
     
     return render_template('set_budget.html', title='Set Budget', form=form)
 
-@app.route('/budgets')
+@main.route('/budgets')
 @login_required
 def view_budgets():
     from flask_paginate import Pagination, get_page_parameter
@@ -247,7 +249,7 @@ def view_budgets():
     
     return render_template('budgets.html', title='Your Budgets', budgets=budgets, pagination=pagination)
 
-@app.route('/reports')
+@main.route('/reports')
 @login_required
 def reports():
     
@@ -277,7 +279,7 @@ def reports():
     return render_template('reports.html', title='Reports', report_data=report_data, month=current_month, year=current_year)
 
 
-@app.route('/edit_budget/<int:budget_id>', methods=['GET', 'POST'])
+@main.route('/edit_budget/<int:budget_id>', methods=['GET', 'POST'])
 @login_required
 def edit_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
@@ -308,7 +310,7 @@ def edit_budget(budget_id):
             flash('A budget for this category and month already exists.')
     return render_template('edit_budget.html', title='Edit Budget', form=form, budget=budget)
 
-@app.route('/delete_budget/<int:budget_id>', methods=['POST'])
+@main.route('/delete_budget/<int:budget_id>', methods=['POST'])
 @login_required
 def delete_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
@@ -320,7 +322,7 @@ def delete_budget(budget_id):
     flash('Budget deleted successfully.')
     return redirect(url_for('view_budgets'))
 
-@app.route('/profile', methods=['GET', 'POST'])
+@main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     form = UpdateProfileForm(obj=current_user)
@@ -336,7 +338,7 @@ def profile():
             flash('Username or email already exists.', 'danger')
     return render_template('profile.html', title='Profile', form=form)
 
-@app.route('/change_password', methods=['GET', 'POST'])
+@main.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
     form = ChangePasswordForm()
@@ -350,7 +352,7 @@ def change_password():
         return redirect(url_for('profile'))
     return render_template('change_password.html', title='Change Password', form=form)
 
-@app.route('/edit_category/<int:category_id>', methods=['GET', 'POST'])
+@main.route('/edit_category/<int:category_id>', methods=['GET', 'POST'])
 @login_required
 def edit_category(category_id):
     category = Category.query.get_or_404(category_id)
@@ -369,7 +371,7 @@ def edit_category(category_id):
             flash('Category name already exists.', 'danger')
     return render_template('edit_category.html', form=form, title='Edit Category')
 
-@app.route('/delete_category/<int:category_id>', methods=['POST'])
+@main.route('/delete_category/<int:category_id>', methods=['POST'])
 @login_required
 def delete_category(category_id):
     category = Category.query.get_or_404(category_id)
