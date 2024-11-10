@@ -1,39 +1,79 @@
+/* Import Google Fonts for Modern Typography */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto+Slab:wght@700&display=swap');
+
+/* Global Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Open Sans', sans-serif; /* Updated to a modern, clean font */
     margin: 0;
     padding: 0;
+    background: linear-gradient(135deg, #E8CEBF 0%, #FDF8F5 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: black; /* Set a base text color for better readability */
 }
 
+/* Header Styles */
 header {
-    background-color: #333;
+    background-color: rgba(51, 51, 51, 0.9); /* Semi-transparent background for depth */
     color: #fff;
-    padding: 1rem;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added subtle shadow */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
+/* Navigation Bar Styles */
 nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     display: flex;
+    align-items: center;
 }
 
 nav ul li {
-    margin-right: 1rem;
+    margin-right: 1.5rem; /* Increased spacing for a cleaner look */
 }
 
 nav ul li a {
     color: #fff;
     text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    transition: color 0.3s ease;
 }
 
+nav ul li a:hover {
+    color: #ffd700; /* Gold color on hover for interactivity */
+}
+
+/* Active Navigation Link */
+nav ul li a.active::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #ffd700; /* Gold underline for active link */
+    margin-top: 5px;
+}
+
+/* Main Content Styles */
 main {
-    padding: 1rem;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for content */
+    margin: 2rem auto;
+    max-width: 1200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Table Styles */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
 }
 
 table, th, td {
@@ -41,17 +81,25 @@ table, th, td {
 }
 
 th, td {
-    padding: 0.5rem;
+    padding: 0.75rem;
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #f9fafb; /* Light gray background for headers */
+    color: #1e3c72; /* Deep blue text for headers */
+    font-weight: 700;
 }
 
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* Zebra striping for rows */
+}
+
+/* Flash Messages Styles */
 .flashes {
     list-style-type: none;
     padding: 0;
+    margin-bottom: 1.5rem;
 }
 
 .flashes li {
@@ -61,13 +109,90 @@ th {
     margin-bottom: 1rem;
     border: 1px solid #bce8f1;
     border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: opacity 0.5s ease;
 }
 
+.flashes li.fade-out {
+    opacity: 0;
+}
+
+/* Footer Styles */
 footer {
-    background-color: #f1f1f1;
+    background-color: rgba(241, 241, 241, 0.9); /* Semi-transparent background */
     text-align: center;
-    padding: 1rem;
+    padding: 1rem 2rem;
     position: fixed;
     width: 100%;
     bottom: 0;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+    font-size: 0.9rem;
+}
+
+/* Button Styles */
+button, .btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button.primary, .btn-primary {
+    background-color: #1e3c72;
+    color: #fff;
+}
+
+button.primary:hover, .btn-primary:hover {
+    background-color: #2a5298;
+    transform: translateY(-2px);
+}
+
+button.secondary, .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+button.secondary:hover, .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Input and Select Styles */
+input, select, textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+    font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #1e3c72;
+    outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav ul li {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    main {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    footer {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.8rem;
+    }
 }
