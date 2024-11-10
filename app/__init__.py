@@ -3,22 +3,27 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
+import os
 
-db = SQLAlchemy()
-login_manager = LoginManager()
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app.config.from_object(Config)
 
-    db.init_app(app)
-    Migrate(app, db)
-    
-    login_manager.init_app(app)
-    login_manager.login_view = 'main.login' 
 
-    # Register blueprint
-    from .routes import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db, render_as_batch=True)
 
-    return app
+
+login = LoginManager(app)
+login.login_view = 'main.login'  
+
+
+from app.models import User
+
+@login.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+from app.routes import main as main_blueprint
+app.register_blueprint(main_blueprint)
