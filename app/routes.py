@@ -70,7 +70,8 @@ def index():
         search_category=search_category,
         search_start_date=search_start_date,
         search_end_date=search_end_date,
-        pagination=pagination
+        pagination=pagination,
+        form=form
     )
 
 @app.route('/add_transaction', methods=['GET', 'POST'])
