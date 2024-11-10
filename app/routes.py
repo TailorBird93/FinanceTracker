@@ -5,6 +5,7 @@ from app.models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlparse
 from sqlalchemy import extract, func
+from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
 @app.route('/')
@@ -128,17 +129,39 @@ def add_category():
 def set_budget():
     form = BudgetForm()
     form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
+    
     if form.validate_on_submit():
+        selected_month = form.month.data
+        print(f"Selected Month: {selected_month}") 
+        
+        
+        existing_budget = Budget.query.filter_by(
+            user_id=current_user.id,
+            category_id=form.category.data,
+            month=selected_month
+        ).first()
+        
+        if existing_budget:
+            flash('A budget for this category and month already exists.')
+            return redirect(url_for('set_budget'))
+        
         budget = Budget(
             amount=form.amount.data,
-            month=form.month.data,
+            month=selected_month,
             category_id=form.category.data,
             user_id=current_user.id
         )
         db.session.add(budget)
-        db.session.commit()
-        flash('Budget set successfully.')
-        return redirect(url_for('view_budgets'))
+        
+        try:
+            db.session.commit()
+            flash('Budget set successfully.')
+            return redirect(url_for('view_budgets'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('A budget for this category and month already exists.')
+            return redirect(url_for('set_budget'))
+    
     return render_template('set_budget.html', title='Set Budget', form=form)
 
 @app.route('/budgets')

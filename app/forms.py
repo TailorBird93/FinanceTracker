@@ -54,7 +54,7 @@ class BudgetForm(FlaskForm):
         'Month',
         validators=[
             DataRequired(),
-            Regexp(r'^\d{4}-(0[1-9]|1[0-2])$', message="Please enter a valid month in YYYY-MM format.")
+            Regexp(r'^\d{4}-(0[1-9]|1[0-2])$', message="Please select a valid month.")
         ]
     )
     category = SelectField('Category', coerce=int, validators=[DataRequired()])
