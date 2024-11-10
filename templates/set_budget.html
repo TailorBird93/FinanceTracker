@@ -1,21 +1,48 @@
+<!-- templates/set_budget.html -->
+
 {% extends 'base.html' %}
-{% block title %}Set Budget{% endblock %}
+{% block title %}Set Budget - Finance Tracker{% endblock %}
 {% block content %}
-<h1>Set a New Budget</h1>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.amount.label }}<br>
-        {{ form.amount() }}
-    </p>
-    <p>
-        {{ form.month.label }}<br>
-        {{ form.month(type="month") }}
-    </p>
-    <p>
-        {{ form.category.label }}<br>
-        {{ form.category() }}
-    </p>
-    <p>{{ form.submit() }}</p>
-</form>
+<div class="container">
+    <h1>Set a New Budget</h1>
+    <form method="post" class="row g-3">
+        {{ form.hidden_tag() }}
+        <div class="col-md-4">
+            {{ form.amount.label(class="form-label") }}
+            {{ form.amount(class="form-control", placeholder="Enter budget amount") }}
+            {% if form.amount.errors %}
+                <div class="text-danger">
+                    {% for error in form.amount.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            {{ form.month.label(class="form-label") }}
+            {{ form.month(class="form-control", placeholder="YYYY-MM") }}
+            {% if form.month.errors %}
+                <div class="text-danger">
+                    {% for error in form.month.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-select") }}
+            {% if form.category.errors %}
+                <div class="text-danger">
+                    {% for error in form.category.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
 {% endblock %}

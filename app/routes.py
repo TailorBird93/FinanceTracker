@@ -7,7 +7,8 @@ from app.forms import (
     TransactionForm,
     CategoryForm,
     BudgetForm,
-    ChangePasswordForm
+    ChangePasswordForm,
+    UpdateProfileForm
     )
 from app.models import User, Transaction, Category, Budget
 from flask_login import current_user, login_user, logout_user, login_required
@@ -319,10 +320,21 @@ def delete_budget(budget_id):
     flash('Budget deleted successfully.')
     return redirect(url_for('view_budgets'))
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html', title='Profile')
+    form = UpdateProfileForm(obj=current_user)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        try:
+            db.session.commit()
+            flash('Your profile has been updated.', 'success')
+            return redirect(url_for('profile'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Username or email already exists.', 'danger')
+    return render_template('profile.html', title='Profile', form=form)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
