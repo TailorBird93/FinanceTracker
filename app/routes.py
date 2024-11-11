@@ -67,7 +67,7 @@ def index():
         db.session.add(transaction)
         db.session.commit()
         flash('Your transaction has been added.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     categories = Category.query.filter_by(user_id=current_user.id).all()
     
@@ -91,7 +91,7 @@ def add_transaction():
     categories = Category.query.filter_by(user_id=current_user.id).all()
     if not categories:
         flash('Please add a category before adding transactions.')
-        return redirect(url_for('add_category'))
+        return redirect(url_for('main.add_category'))
     form.category.choices = [(c.id, c.name) for c in categories]
     if form.validate_on_submit():
         transaction = Transaction(
@@ -104,7 +104,7 @@ def add_transaction():
         db.session.add(transaction)
         db.session.commit()
         flash('Your transaction has been added.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     return render_template('add_transaction.html', title='Add Transaction', form=form)
 
 
@@ -114,7 +114,7 @@ def edit_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
     if transaction.user_id != current_user.id:
         flash('You do not have permission to edit this transaction.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = TransactionForm(obj=transaction)
     form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
     if form.validate_on_submit():
@@ -124,7 +124,7 @@ def edit_transaction(transaction_id):
         transaction.description = form.description.data
         db.session.commit()
         flash('Transaction updated successfully.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     return render_template('edit_transaction.html', title='Edit Transaction', form=form, transaction=transaction)
 
 @main.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
@@ -133,38 +133,38 @@ def delete_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
     if transaction.user_id != current_user.id:
         flash('You do not have permission to delete this transaction.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     db.session.delete(transaction)
     db.session.commit()
     flash('Transaction deleted successfully.')
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
-            next_page = url_for('index')
+            next_page = url_for('main.index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
 @main.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('main.login'))
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
@@ -172,7 +172,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
-        return redirect(url_for('login'))
+        return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
 
 @main.route('/categories')
@@ -190,7 +190,7 @@ def add_category():
         db.session.add(category)
         db.session.commit()
         flash('Category added successfully.')
-        return redirect(url_for('categories'))
+        return redirect(url_for('main.categories'))
     return render_template('add_category.html', title='Add Category', form=form)
 
 @main.route('/set_budget', methods=['GET', 'POST'])
@@ -212,7 +212,7 @@ def set_budget():
         
         if existing_budget:
             flash('A budget for this category and month already exists.')
-            return redirect(url_for('set_budget'))
+            return redirect(url_for('main.set_budget'))
         
         budget = Budget(
             amount=form.amount.data,
@@ -225,11 +225,11 @@ def set_budget():
         try:
             db.session.commit()
             flash('Budget set successfully.')
-            return redirect(url_for('view_budgets'))
+            return redirect(url_for('main.view_budgets'))
         except IntegrityError:
             db.session.rollback()
             flash('A budget for this category and month already exists.')
-            return redirect(url_for('set_budget'))
+            return redirect(url_for('main.set_budget'))
     
     return render_template('set_budget.html', title='Set Budget', form=form)
 
@@ -285,7 +285,7 @@ def edit_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
     if budget.user_id != current_user.id:
         flash('You do not have permission to edit this budget.')
-        return redirect(url_for('view_budgets'))
+        return redirect(url_for('main.view_budgets'))
     form = BudgetForm(obj=budget)
     form.category.choices = [(c.id, c.name) for c in Category.query.filter_by(user_id=current_user.id).all()]
     if form.validate_on_submit():
@@ -296,7 +296,7 @@ def edit_budget(budget_id):
         ).first()
         if existing_budget and existing_budget.id != budget.id:
             flash('A budget for this category and month already exists.')
-            return redirect(url_for('edit_budget', budget_id=budget.id))
+            return redirect(url_for('main.edit_budget', budget_id=budget.id))
         
         budget.amount = form.amount.data
         budget.month = form.month.data
@@ -304,7 +304,7 @@ def edit_budget(budget_id):
         try:
             db.session.commit()
             flash('Budget updated successfully.')
-            return redirect(url_for('view_budgets'))
+            return redirect(url_for('main.view_budgets'))
         except IntegrityError:
             db.session.rollback()
             flash('A budget for this category and month already exists.')
@@ -316,11 +316,11 @@ def delete_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
     if budget.user_id != current_user.id:
         flash('You do not have permission to delete this budget.')
-        return redirect(url_for('view_budgets'))
+        return redirect(url_for('main.view_budgets'))
     db.session.delete(budget)
     db.session.commit()
     flash('Budget deleted successfully.')
-    return redirect(url_for('view_budgets'))
+    return redirect(url_for('main.view_budgets'))
 
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -332,7 +332,7 @@ def profile():
         try:
             db.session.commit()
             flash('Your profile has been updated.', 'success')
-            return redirect(url_for('profile'))
+            return redirect(url_for('main.profile'))
         except IntegrityError:
             db.session.rollback()
             flash('Username or email already exists.', 'danger')
@@ -345,11 +345,11 @@ def change_password():
     if form.validate_on_submit():
         if not current_user.check_password(form.current_password.data):
             flash('Current password is incorrect.', 'danger')
-            return redirect(url_for('change_password'))
+            return redirect(url_for('main.change_password'))
         current_user.set_password(form.new_password.data)
         db.session.commit()
         flash('Your password has been updated.', 'success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('main.profile'))
     return render_template('change_password.html', title='Change Password', form=form)
 
 @main.route('/edit_category/<int:category_id>', methods=['GET', 'POST'])
@@ -365,7 +365,7 @@ def edit_category(category_id):
         try:
             db.session.commit()
             flash('Category updated successfully.', 'success')
-            return redirect(url_for('categories'))
+            return redirect(url_for('main.categories'))
         except IntegrityError:
             db.session.rollback()
             flash('Category name already exists.', 'danger')
@@ -381,4 +381,4 @@ def delete_category(category_id):
     db.session.delete(category)
     db.session.commit()
     flash('Category deleted successfully.', 'success')
-    return redirect(url_for('categories'))
+    return redirect(url_for('main.categories'))
