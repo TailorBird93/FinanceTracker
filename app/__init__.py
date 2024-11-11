@@ -15,16 +15,11 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    login.login_view = 'main.login'
+    login.login_view = 'main.login'  # Adjust if your login route is named differently
 
-    
-    @login.user_loader
-    def load_user(user_id):
-        from app.models import User
-        return User.query.get(int(user_id))
-
+    # Import the blueprint correctly
     with app.app_context():
-        from app.main import bp as main_bp
-        app.register_blueprint(main_bp)
+        from app.routes import main as main_blueprint
+        app.register_blueprint(main_blueprint)
 
     return app
