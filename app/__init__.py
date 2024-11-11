@@ -3,7 +3,6 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
-from app.models import User
 
 db = SQLAlchemy()
 login = LoginManager()
@@ -18,14 +17,14 @@ def create_app():
     login.init_app(app)
     login.login_view = 'main.login'
 
+    
     @login.user_loader
     def load_user(user_id):
+        from app.models import User
         return User.query.get(int(user_id))
-    
-    with app.app_context():
-        from app.routes import main as main_blueprint  
-        app.register_blueprint(main_blueprint)  
 
-        from app import models  
+    with app.app_context():
+        from app.main import bp as main_bp
+        app.register_blueprint(main_bp)
 
     return app
