@@ -1,30 +1,36 @@
+
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_bootstrap import Bootstrap  # If you're using Flask-Bootstrap
 
 db = SQLAlchemy()
-login = LoginManager()
 migrate = Migrate()
+login = LoginManager()
+login.login_view = 'login'
+bootstrap = Bootstrap()
 
-@login.user_loader
-def load_user(user_id):
-    from app.models import User
-    return User.query.get(int(user_id))
-
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    login.login_view = 'main.login'  # Adjust if your login route is different
+    bootstrap.init_app(app)
 
-    # Import and register the blueprint
-    with app.app_context():
-        from app.routes import main as main_blueprint
-        app.register_blueprint(main_blueprint)
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    from app.auth import bp as auth_bp  # If you have an auth blueprint
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
     return app
+
+from app.models import User  # Ensure this import is here
+
+@login.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
