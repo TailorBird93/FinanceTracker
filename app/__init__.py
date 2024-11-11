@@ -22,11 +22,9 @@ def create_app(config_class=Config):
     login.init_app(app)
     bootstrap.init_app(app)
 
-    from app.main import bp as main_bp
+    from app.routes import main as main_bp  # Updated import
     app.register_blueprint(main_bp)
 
-    from app.auth import bp as auth_bp  # If you have an auth blueprint
-    app.register_blueprint(auth_bp, url_prefix='/auth')
 
     return app
 
