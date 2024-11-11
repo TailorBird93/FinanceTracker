@@ -8,6 +8,11 @@ db = SQLAlchemy()
 login = LoginManager()
 migrate = Migrate()
 
+@login.user_loader
+def load_user(user_id):
+    from app.models import User
+    return User.query.get(int(user_id))
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -15,9 +20,9 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    login.login_view = 'main.login'  # Adjust if your login route is named differently
+    login.login_view = 'main.login'  # Adjust if your login route is different
 
-    # Import the blueprint correctly
+    # Import and register the blueprint
     with app.app_context():
         from app.routes import main as main_blueprint
         app.register_blueprint(main_blueprint)
