@@ -10,7 +10,7 @@ from flask_bootstrap import Bootstrap  # If you're using Flask-Bootstrap
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
-login.login_view = 'login'
+login.login_view = 'main.login'
 bootstrap = Bootstrap()
 
 def create_app(config_class=Config):
